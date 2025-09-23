@@ -392,7 +392,7 @@ export const FormBuilder: React.FC = () => {
                         <img 
                           src={heroImageUrl} 
                           alt="Hero banner preview" 
-                          className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                          className="w-full h-32 object-contain sm:object-cover rounded-lg border border-gray-200"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
                           }}

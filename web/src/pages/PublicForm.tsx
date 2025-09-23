@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { apiService } from '../services/api';
 import { Form, FormField, FormSubmission, MultiLanguageText } from '../types/form';
 import { Button } from '../presentation/components/ui/core/Button';
+import PhoneInput from '../presentation/components/PhoneInput';
 
 export const PublicForm: React.FC = () => {
   const { formId, language } = useParams<{ formId: string; language: 'ar' | 'en' }>();
@@ -11,6 +12,7 @@ export const PublicForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [formData, setFormData] = useState<Record<string, any>>({});
 
@@ -30,7 +32,6 @@ export const PublicForm: React.FC = () => {
 
   // Labels for phone number field in both languages
   const phoneLabel = currentLanguage === 'ar' ? 'رقم الهاتف' : 'Phone Number';
-  const phonePlaceholder = currentLanguage === 'ar' ? '+965 9000 0000' : '+965 9000 0000';
   const submitButtonText = currentLanguage === 'ar' ? 'إرسال' : 'Submit';
   const loadingText = currentLanguage === 'ar' ? 'جاري التحميل...' : 'Loading form...';
   const errorNotFound = currentLanguage === 'ar' ? 'النموذج غير موجود أو غير متاح' : 'Form not found or unavailable';
@@ -62,7 +63,12 @@ export const PublicForm: React.FC = () => {
 
   const validateForm = (): boolean => {
     if (!phoneNumber.trim()) {
-      setError(currentLanguage === 'ar' ? 'رقم الهاتف مطلوب' : 'Phone number is required');
+      // keep page banner clean; inline phone input will show the message
+      return false;
+    }
+    // E.164 minimal sanity check: + followed by 8-15 digits
+    const e164Pattern = /^\+[1-9]\d{7,14}$/;
+    if (!e164Pattern.test(phoneNumber)) {
       return false;
     }
 
@@ -81,6 +87,7 @@ export const PublicForm: React.FC = () => {
   };
 
   const submitForm = async () => {
+    setSubmitAttempted(true);
     if (!validateForm() || !form) return;
 
     try {
@@ -105,7 +112,7 @@ export const PublicForm: React.FC = () => {
     // const fieldLabel = getText(field.label);
     const fieldPlaceholder = field.placeholder ? getText(field.placeholder) : '';
     
-    const baseClasses = `w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${isRTL ? 'text-right' : 'text-left'}`;
+    const baseClasses = `w-full py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${isRTL ? 'pr-4 pl-2 text-right' : 'pl-4 pr-2 text-left'}`;
     const rtlClass = isRTL ? 'force-rtl' : '';
 
     switch (field.type) {
@@ -294,11 +301,11 @@ export const PublicForm: React.FC = () => {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               {/* Hero Banner */}
               {form.heroImageUrl && (
-                <div className="w-full h-48 bg-gray-200 overflow-hidden">
+                <div className="w-full h-40 sm:h-48 bg-gray-200 overflow-hidden hero-banner">
                   <img 
                     src={form.heroImageUrl} 
                     alt="Form banner" 
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain sm:object-cover"
                     onError={(e) => {
                       e.currentTarget.parentElement!.style.display = 'none';
                     }}
@@ -314,21 +321,25 @@ export const PublicForm: React.FC = () => {
                   )}
                 </div>
 
-              {/* Phone Number Field - Always Required */}
+              {/* Phone Number Field - Country-aware with validation */}
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  {phoneLabel} *
-                </label>
-                <input
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 placeholder-gray-500 ${isRTL ? 'text-right' : 'text-left'}`}
-                  placeholder={phonePlaceholder}
+                <PhoneInput
+                  isRTL={isRTL}
+                  defaultCountry={currentLanguage === 'ar' ? 'KW' : 'KW'}
+                  labels={{
+                    country: currentLanguage === 'ar' ? 'الدولة' : 'Country',
+                    number: phoneLabel,
+                    invalid: currentLanguage === 'ar' ? 'رقم غير صالح للدولة المختارة' : 'Invalid number for selected country',
+                  }}
                   required
-                  dir={isRTL ? 'rtl' : 'ltr'}
+                  submitAttempted={submitAttempted}
+                  onChange={({ e164, national, isValid }: { e164?: string; national: string; country: string; isValid: boolean }) => {
+                    // store E.164 when valid, otherwise keep raw to allow correction
+                    setPhoneNumber(e164 || national);
+                    // no page-level error; inline component handles display
+                  }}
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-left' : 'text-left'}`}>
                   {currentLanguage === 'ar' 
                     ? 'مطلوب للتواصل معك من قبل فريقنا'
                     : 'Required for our agent to contact you'}
@@ -339,9 +350,9 @@ export const PublicForm: React.FC = () => {
               <div className="space-y-6 mb-8">
                 {form.fields.map((field) => (
                   <div key={field.id}>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    <label className={`block text-sm font-semibold text-gray-900 mb-2 ${isRTL ? 'text-left' : 'text-left'}`}>
                       {getText(field.label)}
-                      {field.required && <span className="text-red-500 ml-1">*</span>}
+                      {field.required && <span className={`text-red-500 ${isRTL ? 'mr-1' : 'ml-1'}`}>*</span>}
                     </label>
                     {renderField(field)}
                   </div>

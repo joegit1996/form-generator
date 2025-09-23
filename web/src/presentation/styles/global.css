@@ -52,3 +52,101 @@
   direction: rtl !important;
   text-align: right !important;
 }
+
+/* Force RTL and start alignment for placeholders in Arabic */
+[dir="rtl"] ::placeholder,
+[dir="rtl"] ::-webkit-input-placeholder,
+[dir="rtl"] ::-moz-placeholder,
+[dir="rtl"] :-ms-input-placeholder,
+[dir="rtl"] :-moz-placeholder {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+/* Ensure all RTL inputs have right-aligned text */
+[dir="rtl"] input[type="text"],
+[dir="rtl"] input[type="email"],
+[dir="rtl"] input[type="password"],
+[dir="rtl"] input[type="number"],
+[dir="rtl"] input[type="tel"],
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right !important;
+  direction: rtl !important;
+}
+
+/* RTL input styling */
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right !important;
+}
+
+/* Force RTL class for inputs */
+.force-rtl {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+.force-rtl::placeholder {
+  text-align: right !important;
+}
+
+/* Arabic form layout - labels left-aligned, inputs right-aligned */
+[dir="rtl"] .form-label {
+  text-align: left !important;
+}
+
+[dir="rtl"] .form-input {
+  text-align: right !important;
+  direction: rtl !important;
+}
+
+/* Override any conflicting styles for RTL inputs */
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right !important;
+  direction: rtl !important;
+}
+
+/* Force placeholder alignment for RTL */
+[dir="rtl"] input::placeholder,
+[dir="rtl"] textarea::placeholder {
+  text-align: right !important;
+  direction: rtl !important;
+}
+
+/* Mobile-specific fixes for hero banner */
+@media (max-width: 640px) {
+  .min-h-screen {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  
+  /* Ensure proper spacing on mobile */
+  .text-center {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Prevent text overflow on small screens */
+  h1, h2, h3 {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Hero image mobile optimizations */
+  .hero-banner img {
+    object-fit: contain !important;
+    object-position: center !important;
+  }
+  
+  /* Ensure hero images don't get cropped on mobile */
+  .hero-banner {
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

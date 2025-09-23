@@ -33,11 +33,21 @@ RUN apk --no-cache add wget
 # Copy built app from builder stage - v4
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy nginx configuration template (use local config for Docker local runs)
+COPY nginx.local.conf /etc/nginx/conf.d/default.conf.template
+
+# Create startup script with proper environment variable handling
+RUN echo '#!/bin/sh' > /docker-entrypoint.sh && \
+    echo 'export BACKEND_URL=${BACKEND_URL:-http://localhost:5001}' >> /docker-entrypoint.sh && \
+    echo 'envsubst "\$BACKEND_URL" < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf' >> /docker-entrypoint.sh && \
+    echo 'nginx -g "daemon off;"' >> /docker-entrypoint.sh && \
+    chmod +x /docker-entrypoint.sh
+
+# Set default environment variable
+ENV BACKEND_URL=http://localhost:5001
 
 # Expose port
 EXPOSE 80
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"] 
+# Start nginx with environment variable substitution
+CMD ["/docker-entrypoint.sh"] 

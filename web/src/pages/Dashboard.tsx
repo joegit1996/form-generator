@@ -101,19 +101,19 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8 sm:mb-12">
           <img 
             src="/4sale-logo.png" 
             alt="4Sale" 
-            className="h-16 mx-auto mb-6"
+            className="h-12 sm:h-16 mx-auto mb-4 sm:mb-6"
           />
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Form Dashboard</h1>
-          <p className="text-gray-600 text-lg mb-8">Manage your forms and view submissions</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-4">Form Dashboard</h1>
+          <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 px-2">Manage your forms and view submissions</p>
           
           <Link to="/form-builder">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white border-0 px-8">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white border-0 px-6 sm:px-8 text-sm sm:text-base">
               <span className="mr-2">+</span>
               Create New Form
             </Button>

@@ -866,6 +866,28 @@ func migrateFieldsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{"migrated_forms": updatedForms, "migrated_fields": updatedFields})
 }
 
+func migrateLanguageColumnHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Add language column to form_responses table
+	_, err := db.Exec(`
+		ALTER TABLE form_responses 
+		ADD COLUMN language VARCHAR(10) DEFAULT 'en' 
+		AFTER response_data
+	`)
+	if err != nil {
+		log.Printf("Error adding language column: %v", err)
+		http.Error(w, "Error adding language column", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"message": "Language column added successfully"})
+}
+
 // Route handler
 func setupRoutes() {
         // Health check
@@ -908,6 +930,7 @@ func setupRoutes() {
         http.HandleFunc("/migrate-hero-image", migrateHeroImageHandler)
         http.HandleFunc("/migrate-multi-language", migrateMultiLanguageHandler)
         http.HandleFunc("/migrate-fields", migrateFieldsHandler)
+        http.HandleFunc("/migrate-language-column", migrateLanguageColumnHandler)
 }
 
 // main is the entry point of the Dynamic Form Creator API
